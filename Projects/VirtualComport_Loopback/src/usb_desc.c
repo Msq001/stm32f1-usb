@@ -43,39 +43,55 @@
 /* USB Standard Device Descriptor */
 const uint8_t Virtual_Com_Port_DeviceDescriptor[] =
   {
-    0x12,   /* bLength */
-    USB_DEVICE_DESCRIPTOR_TYPE,     /* bDescriptorType */
-    0x00,
-    0x02,   /* bcdUSB = 2.00 */
-    0x02,   /* bDeviceClass: CDC */
-    0x02,   /* bDeviceSubClass */
-    0x02,   /* bDeviceProtocol */
-    0x40,   /* bMaxPacketSize0 */
-    0x83,
-    0x04,   /* idVendor = 0x0483 */
-    0x40,
-    0x57,   /* idProduct = 0x7540 */
-    0x00,
-    0x02,   /* bcdDevice = 2.00 */
-    1,              /* Index of string descriptor describing manufacturer */
-    2,              /* Index of string descriptor describing product */
-    3,              /* Index of string descriptor describing the device's serial number */
-    0x01    /* bNumConfigurations */
+    0x12,   /* bLength  */
+    0x01,   /* bDescriptorType */
+    0x00,   /* bcdUSB, version 2.00 */
+    0x02,
+    0x00,   /* bDeviceClass : each interface define the device class */
+    0x00,   /* bDeviceSubClass */
+    0x00,   /* bDeviceProtocol */
+    0x40,   /* bMaxPacketSize0 0x40 = 64 */
+    0x83,   /* idVendor     (0483) */
+    0x04,
+    0x40,   /* idProduct */
+    0x57,
+    0x00,   /* bcdDevice 2.00*/
+    0x02,
+    1,              /* index of string Manufacturer  */
+    /**/
+    2,              /* index of string descriptor of product*/
+    /* */
+    3,              /* */
+    /* */
+    /* */
+    0x01    /*bNumConfigurations */
   };
 
 const uint8_t Virtual_Com_Port_ConfigDescriptor[] =
   {
-    /*Configuration Descriptor*/
     0x09,   /* bLength: Configuration Descriptor size */
-    USB_CONFIGURATION_DESCRIPTOR_TYPE,      /* bDescriptorType: Configuration */
-    VIRTUAL_COM_PORT_SIZ_CONFIG_DESC,       /* wTotalLength:no of returned bytes */
+    0x02,   /* bDescriptorType: Configuration */
+    VIRTUAL_COM_PORT_SIZ_CONFIG_DESC,
+
     0x00,
-    0x02,   /* bNumInterfaces: 2 interface */
-    0x01,   /* bConfigurationValue: Configuration value */
-    0x00,   /* iConfiguration: Index of string descriptor describing the configuration */
-    0xC0,   /* bmAttributes: self powered */
+    0x03,   /* bNumInterfaces: 1 interface */
+    0x01,   /* bConfigurationValue: */
+    /*      Configuration value */
+    0x00,   /* iConfiguration: */
+    /*      Index of string descriptor */
+    /*      describing the configuration */
+    0xC0,   /* bmAttributes: */
+    /*      Self powered */
     0x32,   /* MaxPower 100 mA */
     
+    0x08,        //描述符大小
+    0x0B,        //IAD描述符类型
+    0x00,        // bFirstInterface 
+    0x02,        // bInterfaceCount
+    0x02,        // bFunctionClass: CDC Class
+    0x02,        // bFunctionSubClass
+    0x01,        // bFunctionProtocol
+    0x00,        // iFunction
     
     /*Interface Descriptor*/
     0x09,   /* bLength: Interface Descriptor size */
@@ -120,7 +136,6 @@ const uint8_t Virtual_Com_Port_ConfigDescriptor[] =
     0x00,
     0xFF,   /* bInterval: */
     
-    
     /*Data class interface descriptor*/
     0x09,   /* bLength: Endpoint Descriptor size */
     USB_INTERFACE_DESCRIPTOR_TYPE,  /* bDescriptorType: */
@@ -130,8 +145,8 @@ const uint8_t Virtual_Com_Port_ConfigDescriptor[] =
     0x0A,   /* bInterfaceClass: CDC */
     0x00,   /* bInterfaceSubClass: */
     0x00,   /* bInterfaceProtocol: */
-    0x00,   /* iInterface: */
-    /*Endpoint 3 Descriptor*/
+    0x01,   /* iInterface: */
+    /*Endpoint 5 Descriptor*/
     0x07,   /* bLength: Endpoint Descriptor size */
     USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
     0x03,   /* bEndpointAddress: (OUT3) */
@@ -139,13 +154,54 @@ const uint8_t Virtual_Com_Port_ConfigDescriptor[] =
     VIRTUAL_COM_PORT_DATA_SIZE,             /* wMaxPacketSize: */
     0x00,
     0x00,   /* bInterval: ignore for Bulk transfer */
+    /*Endpoint 3 Descriptor*/
     0x07,   /* bLength: Endpoint Descriptor size */
     USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
     0x83,   /* bEndpointAddress: (IN3) */
     0x02,   /* bmAttributes: Bulk */
     VIRTUAL_COM_PORT_DATA_SIZE,             /* wMaxPacketSize: */
     0x00,
-    0x00    /* bInterval */
+    0x00,    /* bInterval */
+    
+    
+    0x08,        //描述符大小
+    0x0B,        //IAD描述符类型
+    0x02,        // bFirstInterface
+    0x01,        // bInterfaceCount
+    0x08,        // bFunctionClass: MASS STORAGE Class
+    0x06,        // bFunctionSubClass
+    0x50,        // bFunctionProtocol
+    0x01,        // iFunction
+        
+    /******************** Descriptor of Mass Storage interface ********************/
+    /* 09 */
+    0x09,   /* bLength: Interface Descriptor size */
+    0x04,   /* bDescriptorType: */
+    /*      Interface descriptor type */
+    0x02,   /* bInterfaceNumber: Number of Interface */
+    0x00,   /* bAlternateSetting: Alternate setting */
+    0x02,   /* bNumEndpoints*/
+    0x08,   /* bInterfaceClass: MASS STORAGE Class */
+    0x06,   /* bInterfaceSubClass : SCSI transparent*/
+    0x50,   /* nInterfaceProtocol */
+    2,          /* iInterface: */
+    /* 18 */
+    0x07,   /*Endpoint descriptor length = 7*/
+    0x05,   /*Endpoint descriptor type */
+    0x81,   /*Endpoint address (IN, address 1) */
+    0x02,   /*Bulk endpoint type */
+    0x40,   /*Maximum packet size (64 bytes) */
+    0x00,
+    0x00,   /*Polling interval in milliseconds */
+    /* 25 */
+    0x07,   /*Endpoint descriptor length = 7 */
+    0x05,   /*Endpoint descriptor type */
+    0x02,   /*Endpoint address (OUT, address 2) */
+    0x02,   /*Bulk endpoint type */
+    0x40,   /*Maximum packet size (64 bytes) */
+    0x00,
+    0x00,     /*Polling interval in milliseconds*/
+    /*32*/
   };
 
 /* USB String Descriptors */
@@ -183,5 +239,11 @@ uint8_t Virtual_Com_Port_StringSerial[VIRTUAL_COM_PORT_SIZ_STRING_SERIAL] =
     USB_STRING_DESCRIPTOR_TYPE,                   /* bDescriptorType */
     'S', 0, 'T', 0, 'M', 0, '3', 0, '2', 0
   };
-
+const uint8_t MASS_StringInterface[MASS_SIZ_STRING_INTERFACE] =
+  {
+    MASS_SIZ_STRING_INTERFACE,
+    0x03,
+    /* Interface 0: "ST Mass" */
+    'S', 0, 'T', 0, ' ', 0, 'M', 0, 'a', 0, 's', 0, 's', 0
+  };
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

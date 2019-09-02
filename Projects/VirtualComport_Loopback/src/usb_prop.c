@@ -43,12 +43,16 @@
 #include "usb_desc.h"
 #include "usb_pwr.h"
 #include "hw_config.h"
+#include "usb_bot.h"
+#include "memory.h"
+#include "mass_mal.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 uint8_t Request = 0;
+uint32_t Max_Lun = 0;
 
 LINE_CODING linecoding =
   {
@@ -109,15 +113,19 @@ ONE_DESCRIPTOR Config_Descriptor =
     VIRTUAL_COM_PORT_SIZ_CONFIG_DESC
   };
 
-ONE_DESCRIPTOR String_Descriptor[4] =
+ONE_DESCRIPTOR String_Descriptor[5] =
   {
     {(uint8_t*)Virtual_Com_Port_StringLangID, VIRTUAL_COM_PORT_SIZ_STRING_LANGID},
     {(uint8_t*)Virtual_Com_Port_StringVendor, VIRTUAL_COM_PORT_SIZ_STRING_VENDOR},
     {(uint8_t*)Virtual_Com_Port_StringProduct, VIRTUAL_COM_PORT_SIZ_STRING_PRODUCT},
-    {(uint8_t*)Virtual_Com_Port_StringSerial, VIRTUAL_COM_PORT_SIZ_STRING_SERIAL}
+    {(uint8_t*)Virtual_Com_Port_StringSerial, VIRTUAL_COM_PORT_SIZ_STRING_SERIAL},
+    {(uint8_t*)MASS_StringInterface, MASS_SIZ_STRING_INTERFACE},
   };
 
 /* Extern variables ----------------------------------------------------------*/
+extern unsigned char Bot_State;
+extern Bulk_Only_CBW CBW;
+  
 /* Private function prototypes -----------------------------------------------*/
 /* Extern function prototypes ------------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -175,6 +183,26 @@ void Virtual_Com_Port_Reset(void)
   SetEPRxCount(ENDP0, Device_Property.MaxPacketSize);
   SetEPRxValid(ENDP0);
 
+  /* Initialize Endpoint 1 */
+  SetEPType(ENDP1, EP_BULK);
+  SetEPTxAddr(ENDP1, ENDP1_TXADDR);
+  SetEPTxStatus(ENDP1, EP_TX_NAK);
+  SetEPRxStatus(ENDP1, EP_RX_DIS);
+
+  /* Initialize Endpoint 2 */
+  SetEPType(ENDP2, EP_BULK);
+  SetEPRxAddr(ENDP2, ENDP2_RXADDR);
+  SetEPRxCount(ENDP2, Device_Property.MaxPacketSize);
+  SetEPRxStatus(ENDP2, EP_RX_VALID);
+  SetEPTxStatus(ENDP2, EP_TX_DIS);
+
+  /* Initialize Endpoint 4 */
+  SetEPType(ENDP4, EP_INTERRUPT);
+  SetEPTxAddr(ENDP4, ENDP4_TXADDR);
+  SetEPRxStatus(ENDP4, EP_RX_DIS);
+  SetEPTxStatus(ENDP4, EP_TX_NAK);
+  
+  
   /* Initialize Endpoint 3 */
   SetEPType(ENDP3, EP_BULK);
   SetEPTxAddr(ENDP3, ENDP3_TXADDR);
@@ -182,18 +210,18 @@ void Virtual_Com_Port_Reset(void)
   SetEPRxAddr(ENDP3, ENDP3_RXADDR);
   SetEPRxCount(ENDP3, VIRTUAL_COM_PORT_DATA_SIZE);
   SetEPRxStatus(ENDP3, EP_RX_VALID);
-
-  /* Initialize Endpoint 4 */
-  SetEPType(ENDP4, EP_INTERRUPT);
-  SetEPTxAddr(ENDP4, ENDP4_TXADDR);
-  SetEPRxStatus(ENDP4, EP_RX_DIS);
-  SetEPTxStatus(ENDP4, EP_TX_NAK);
-
-
-  /* Set this device to response on default address */
-  SetDeviceAddress(0);
   
+ 
+//  SetEPRxCount(ENDP0, Device_Property.MaxPacketSize);
+//  SetEPRxValid(ENDP0);
+
+  /* Set the device to response on default address */
+  SetDeviceAddress(0);
+
   bDeviceState = ATTACHED;
+
+  CBW.dSignature = BOT_CBW_SIGNATURE;
+  Bot_State = BOT_IDLE;
 }
 
 /*******************************************************************************
@@ -211,7 +239,27 @@ void Virtual_Com_Port_SetConfiguration(void)
   {
     /* Device configured */
     bDeviceState = CONFIGURED;
+   
+    ClearDTOG_TX(ENDP1);
+    ClearDTOG_RX(ENDP2);
+
+    Bot_State = BOT_IDLE; /* set the Bot state machine to the IDLE state */
   }
+}
+
+/*******************************************************************************
+* Function Name  : Mass_Storage_ClearFeature
+* Description    : Handle the ClearFeature request.
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+void Virtual_Com_Port_ClearFeature(void)
+{
+  /* when the host send a CBW with invalid signature or invalid length the two
+     Endpoints (IN & OUT) shall stall until receiving a Mass Storage Reset     */
+  if (CBW.dSignature != BOT_CBW_SIGNATURE)
+    Bot_Abort(BOTH_DIR);
 }
 
 /*******************************************************************************
@@ -263,8 +311,13 @@ RESULT Virtual_Com_Port_Data_Setup(uint8_t RequestNo)
   uint8_t    *(*CopyRoutine)(uint16_t);
 
   CopyRoutine = NULL;
-
-  if (RequestNo == GET_LINE_CODING)
+  if ((Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT))
+      && (RequestNo == GET_MAX_LUN) && (pInformation->USBwValue == 0)
+      && (pInformation->USBwIndex == 0) && (pInformation->USBwLength == 0x01))
+  {
+    CopyRoutine = Get_Max_Lun;
+  }
+  else if (RequestNo == GET_LINE_CODING)
   {
     if (Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT))
     {
@@ -300,7 +353,22 @@ RESULT Virtual_Com_Port_Data_Setup(uint8_t RequestNo)
 *******************************************************************************/
 RESULT Virtual_Com_Port_NoData_Setup(uint8_t RequestNo)
 {
+  if ((Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT))
+      && (RequestNo == MASS_STORAGE_RESET) && (pInformation->USBwValue == 0)
+      && (pInformation->USBwIndex == 0) && (pInformation->USBwLength == 0x00))
+  {
+    /* Initialize Endpoint 1 */
+    ClearDTOG_TX(ENDP1);
 
+    /* Initialize Endpoint 2 */
+    ClearDTOG_RX(ENDP2);
+
+    /*initialize the CBW signature to enable the clear feature*/
+    CBW.dSignature = BOT_CBW_SIGNATURE;
+    Bot_State = BOT_IDLE;
+
+    return USB_SUCCESS;
+  }
   if (Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT))
   {
     if (RequestNo == SET_COMM_FEATURE)
@@ -314,6 +382,28 @@ RESULT Virtual_Com_Port_NoData_Setup(uint8_t RequestNo)
   }
 
   return USB_UNSUPPORT;
+}
+
+/*******************************************************************************
+* Function Name  : Virtual_Com_Port_Get_Interface_Setting.
+* Description    : test the interface and the alternate setting according to the
+*                  supported one.
+* Input1         : uint8_t: Interface : interface number.
+* Input2         : uint8_t: AlternateSetting : Alternate Setting number.
+* Output         : None.
+* Return         : The address of the string descriptors.
+*******************************************************************************/
+RESULT Virtual_Com_Port_Get_Interface_Setting(uint8_t Interface, uint8_t AlternateSetting)
+{
+  if (AlternateSetting > 0)
+  {
+    return USB_UNSUPPORT;
+  }
+  else if (Interface > 0)
+  {
+    return USB_UNSUPPORT;
+  }
+  return USB_SUCCESS;
 }
 
 /*******************************************************************************
@@ -350,7 +440,7 @@ uint8_t *Virtual_Com_Port_GetConfigDescriptor(uint16_t Length)
 uint8_t *Virtual_Com_Port_GetStringDescriptor(uint16_t Length)
 {
   uint8_t wValue0 = pInformation->USBwValue0;
-  if (wValue0 >= 4)
+  if (wValue0 >= 5)
   {
     return NULL;
   }
@@ -358,28 +448,6 @@ uint8_t *Virtual_Com_Port_GetStringDescriptor(uint16_t Length)
   {
     return Standard_GetDescriptorData(Length, &String_Descriptor[wValue0]);
   }
-}
-
-/*******************************************************************************
-* Function Name  : Virtual_Com_Port_Get_Interface_Setting.
-* Description    : test the interface and the alternate setting according to the
-*                  supported one.
-* Input1         : uint8_t: Interface : interface number.
-* Input2         : uint8_t: AlternateSetting : Alternate Setting number.
-* Output         : None.
-* Return         : The address of the string descriptors.
-*******************************************************************************/
-RESULT Virtual_Com_Port_Get_Interface_Setting(uint8_t Interface, uint8_t AlternateSetting)
-{
-  if (AlternateSetting > 0)
-  {
-    return USB_UNSUPPORT;
-  }
-  else if (Interface > 1)
-  {
-    return USB_UNSUPPORT;
-  }
-  return USB_SUCCESS;
 }
 
 /*******************************************************************************
@@ -414,6 +482,26 @@ uint8_t *Virtual_Com_Port_SetLineCoding(uint16_t Length)
     return NULL;
   }
   return(uint8_t *)&linecoding;
+}
+
+/*******************************************************************************
+* Function Name  : Get_Max_Lun
+* Description    : Handle the Get Max Lun request.
+* Input          : uint16_t Length.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+uint8_t *Get_Max_Lun(uint16_t Length)
+{
+  if (Length == 0)
+  {
+    pInformation->Ctrl_Info.Usb_wLength = LUN_DATA_LENGTH;
+    return 0;
+  }
+  else
+  {
+    return((uint8_t*)(&Max_Lun));
+  }
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

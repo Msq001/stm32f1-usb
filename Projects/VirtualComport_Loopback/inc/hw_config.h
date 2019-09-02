@@ -41,17 +41,14 @@
 #define __HW_CONFIG_H
 
 /* Includes ------------------------------------------------------------------*/
+
 #include "platform_config.h"
-#include "usb_type.h"
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported define -----------------------------------------------------------*/
-#define MASS_MEMORY_START     0x04002000
 #define BULK_MAX_PACKET_SIZE  0x00000040
-#define LED_ON                0xF0
-#define LED_OFF               0xFF
 
 /* Exported functions ------------------------------------------------------- */
 void Set_System(void);
@@ -61,10 +58,12 @@ void Leave_LowPowerMode(void);
 void USB_Interrupts_Config(void);
 void USB_Cable_Config (FunctionalState NewState);
 void Get_SerialNum(void);
-void LCD_Control(void);
-uint32_t CDC_Send_DATA (uint8_t *ptrBuffer, uint8_t Send_length);
-uint32_t CDC_Receive_DATA(void);
+void MAL_Config(void);
+#if !defined (USE_STM32L152_EVAL) 
+void USB_Disconnect_Config(void);
+#endif /* (USE_STM32L152_EVAL) */
 /* External variables --------------------------------------------------------*/
 
 #endif  /*__HW_CONFIG_H*/
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

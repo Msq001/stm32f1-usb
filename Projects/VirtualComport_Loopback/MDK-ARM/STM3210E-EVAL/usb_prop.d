@@ -47,3 +47,6 @@ stm3210e-eval\usb_prop.o: ../../../Libraries/STM32_USB-FS-Device_Driver/inc/usb_
 stm3210e-eval\usb_prop.o: ../inc/usb_prop.h
 stm3210e-eval\usb_prop.o: ../inc/usb_desc.h
 stm3210e-eval\usb_prop.o: ../inc/usb_pwr.h
+stm3210e-eval\usb_prop.o: ..\src\msc\usb_bot.h
+stm3210e-eval\usb_prop.o: ..\src\msc\memory.h
+stm3210e-eval\usb_prop.o: ..\src\msc\mass_mal.h

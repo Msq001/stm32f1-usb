@@ -38,11 +38,10 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usb_lib.h"
-#include "usb_desc.h"
-#include "usb_mem.h"
-#include "hw_config.h"
+#include "usb_bot.h"
 #include "usb_istr.h"
-#include "usb_pwr.h"
+
+#include "usb_desc.h"
 
 #define QUEUE_BUFFER_SIZE 256
 typedef struct {
@@ -190,13 +189,39 @@ void EP3_OUT_Callback(void)
 {
   VCP_OUT_Callback();
 }
+
+/* Private typedef -----------------------------------------------------------*/
+/* Private define ------------------------------------------------------------*/
+/* Private macro -------------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
+/* Private function prototypes -----------------------------------------------*/
+/* Private functions ---------------------------------------------------------*/
+
 /*******************************************************************************
-* Function Name  : SOF_Callback / INTR_SOFINTR_Callback
-* Description    :
+* Function Name  : EP1_IN_Callback
+* Description    : EP1 IN Callback Routine
 * Input          : None.
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
+void EP1_IN_Callback(void)
+{
+  Mass_Storage_In();
+}
+
+/*******************************************************************************
+* Function Name  : EP2_OUT_Callback.
+* Description    : EP2 OUT Callback Routine.
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+void EP2_OUT_Callback(void)
+{
+  Mass_Storage_Out();
+}
+
+#include "usb_pwr.h"
 void SOF_Callback(void)
 {
 	static uint32_t FrameCount = 0;

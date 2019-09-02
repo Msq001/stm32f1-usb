@@ -43,6 +43,7 @@
 #include "usb_desc.h"
 #include "hw_config.h"
 #include "usb_pwr.h"
+#include "mass_mal.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -50,13 +51,7 @@
 /* Private variables ---------------------------------------------------------*/
 ErrorStatus HSEStartUpStatus;
 EXTI_InitTypeDef EXTI_InitStructure;
-extern __IO uint32_t packet_sent;
-extern __IO uint8_t Send_Buffer[VIRTUAL_COM_PORT_DATA_SIZE] ;
-extern __IO  uint32_t packet_receive;
-extern __IO uint8_t Receive_length;
 
-uint8_t Receive_Buffer[64];
-uint32_t Send_length;
 static void IntToUnicode (uint32_t value , uint8_t *pbuf , uint8_t len);
 /* Extern variables ----------------------------------------------------------*/
 
@@ -177,6 +172,14 @@ void Set_System(void)
   EXTI_Init(&EXTI_InitStructure);
 
 #endif  /* USB_LOW_PWR_MGMT_SUPPORT */
+  
+
+  /********************************************/
+  /*      Init the media interface            */
+  /********************************************/
+  
+  /* MAL configuration */
+  MAL_Config();
 }
 
 /*******************************************************************************
@@ -275,7 +278,7 @@ NVIC_InitTypeDef NVIC_InitStructure;
   
   /* Enable the USB Wake-up interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = USBWakeUp_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
   NVIC_Init(&NVIC_InitStructure);   
 #endif
 }
@@ -300,14 +303,14 @@ void USB_Cable_Config (FunctionalState NewState)
   }  
   
 #else 
-  if (NewState != DISABLE)
+//  if (NewState != DISABLE)
   {
     GPIO_ResetBits(USB_DISCONNECT, USB_DISCONNECT_PIN);
   }
-  else
-  {
-    GPIO_SetBits(USB_DISCONNECT, USB_DISCONNECT_PIN);
-  }
+//  else
+//  {
+//    GPIO_SetBits(USB_DISCONNECT, USB_DISCONNECT_PIN);
+//  }
 #endif
 }
 #endif /* USE_NUCLEO */
@@ -364,6 +367,51 @@ static void IntToUnicode (uint32_t value , uint8_t *pbuf , uint8_t len)
   }
 }
 
+/*******************************************************************************
+* Function Name  : MAL_Config
+* Description    : MAL_layer configuration
+* Input          : None.
+* Return         : None.
+*******************************************************************************/
+void MAL_Config(void)
+{
+  MAL_Init(0);
+}
+
+#if !defined (USE_STM32L152_EVAL) 
+/*******************************************************************************
+* Function Name  : USB_Disconnect_Config
+* Description    : Disconnect pin configuration
+* Input          : None.
+* Return         : None.
+*******************************************************************************/
+void USB_Disconnect_Config(void)
+{
+  GPIO_InitTypeDef GPIO_InitStructure;
+#if defined (USE_STM3210B_EVAL) || defined (USE_STM3210E_EVAL)
+  /* Enable USB_DISCONNECT GPIO clock */
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIO_DISCONNECT, ENABLE);
+
+  /* USB_DISCONNECT_PIN used as USB pull-up */
+  GPIO_InitStructure.GPIO_Pin = USB_DISCONNECT_PIN;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+#else
+	/* Enable the USB disconnect GPIO clock */
+  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIO_DISCONNECT, ENABLE);
+  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_ALLGPIO, ENABLE);
+  
+  /* USB_DISCONNECT used as USB pull-up */
+  GPIO_InitStructure.GPIO_Pin = USB_DISCONNECT_PIN;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+
+#endif
+  GPIO_Init(USB_DISCONNECT, &GPIO_InitStructure);
+}
+#endif /* USE_STM3210B_EVAL or USE_STM3210E_EVAL */
 
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

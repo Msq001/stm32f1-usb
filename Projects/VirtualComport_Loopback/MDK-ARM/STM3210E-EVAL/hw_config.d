@@ -48,3 +48,4 @@ stm3210e-eval\hw_config.o: ../../../Libraries/STM32_USB-FS-Device_Driver/inc/usb
 stm3210e-eval\hw_config.o: ../inc/usb_prop.h
 stm3210e-eval\hw_config.o: ../inc/usb_desc.h
 stm3210e-eval\hw_config.o: ../inc/usb_pwr.h
+stm3210e-eval\hw_config.o: ..\src\msc\mass_mal.h

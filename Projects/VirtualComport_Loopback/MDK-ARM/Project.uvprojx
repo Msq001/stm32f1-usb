@@ -338,7 +338,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F10X_HD,USE_STM3210E_EVAL</Define>
               <Undefine></Undefine>
-              <IncludePath>../inc;../../../Libraries/CMSIS/Device/ST/STM32F10x/Include;../../../Libraries/STM32_USB-FS-Device_Driver/inc;../../../Libraries/STM32F10x_StdPeriph_Driver/inc;../../../Utilities/STM32_EVAL;../../../Utilities/STM32_EVAL/Common;../../../Utilities/STM32_EVAL/STM3210E_EVAL</IncludePath>
+              <IncludePath>../inc;../../../Libraries/CMSIS/Device/ST/STM32F10x/Include;../../../Libraries/STM32_USB-FS-Device_Driver/inc;../../../Libraries/STM32F10x_StdPeriph_Driver/inc;../../../Utilities/STM32_EVAL;../../../Utilities/STM32_EVAL/Common;../../../Utilities/STM32_EVAL/STM3210E_EVAL;..\src\msc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -627,6 +627,46 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>../src/main.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>MSC</GroupName>
+          <Files>
+            <File>
+              <FileName>mass_mal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\msc\mass_mal.c</FilePath>
+            </File>
+            <File>
+              <FileName>memory.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\msc\memory.c</FilePath>
+            </File>
+            <File>
+              <FileName>scsi_data.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\msc\scsi_data.c</FilePath>
+            </File>
+            <File>
+              <FileName>sd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\msc\sd.c</FilePath>
+            </File>
+            <File>
+              <FileName>spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\msc\spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>usb_bot.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\msc\usb_bot.c</FilePath>
+            </File>
+            <File>
+              <FileName>usb_scsi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\msc\usb_scsi.c</FilePath>
             </File>
           </Files>
         </Group>

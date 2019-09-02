@@ -68,9 +68,17 @@
 
 /* EP1  */
 /* tx buffer base address */
-#define ENDP3_TXADDR        (0xC0)
-#define ENDP4_TXADDR        (0x100)
-#define ENDP3_RXADDR        (0x110)
+#define ENDP1_TXADDR        (0xC0)
+
+/* EP2  */
+/* Rx buffer base address */
+#define ENDP2_RXADDR        (0x100)
+
+/* EP3 4 5  */
+/* tx buffer base address */
+#define ENDP3_TXADDR        (0x140)
+#define ENDP3_RXADDR        (0x180)
+#define ENDP4_TXADDR        (0x1C0)
 
 
 /*-------------------------------------------------------------*/
@@ -92,7 +100,7 @@
 /*#define ESOF_CALLBACK*/
 /* CTR service routines */
 /* associated to defined endpoints */
-#define  EP1_IN_Callback   NOP_Process
+//#define  EP1_IN_Callback   NOP_Process
 #define  EP2_IN_Callback   NOP_Process
 //#define  EP3_IN_Callback   NOP_Process
 #define  EP4_IN_Callback   NOP_Process
@@ -101,7 +109,7 @@
 #define  EP7_IN_Callback   NOP_Process
 
 #define  EP1_OUT_Callback   NOP_Process
-#define  EP2_OUT_Callback   NOP_Process
+//#define  EP2_OUT_Callback   NOP_Process
 //#define  EP3_OUT_Callback   NOP_Process
 #define  EP4_OUT_Callback   NOP_Process
 #define  EP5_OUT_Callback   NOP_Process

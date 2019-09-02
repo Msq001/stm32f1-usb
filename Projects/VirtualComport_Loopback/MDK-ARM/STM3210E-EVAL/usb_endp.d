@@ -44,6 +44,7 @@ stm3210e-eval\usb_endp.o: ../../../Libraries/STM32_USB-FS-Device_Driver/inc/usb_
 stm3210e-eval\usb_endp.o: ../../../Libraries/STM32_USB-FS-Device_Driver/inc/usb_sil.h
 stm3210e-eval\usb_endp.o: ../../../Libraries/STM32_USB-FS-Device_Driver/inc/usb_mem.h
 stm3210e-eval\usb_endp.o: ../../../Libraries/STM32_USB-FS-Device_Driver/inc/usb_int.h
-stm3210e-eval\usb_endp.o: ../inc/usb_desc.h
+stm3210e-eval\usb_endp.o: ..\src\msc\usb_bot.h
 stm3210e-eval\usb_endp.o: ../inc/usb_istr.h
+stm3210e-eval\usb_endp.o: ../inc/usb_desc.h
 stm3210e-eval\usb_endp.o: ../inc/usb_pwr.h

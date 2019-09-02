@@ -26,6 +26,13 @@
 "stm3210e-eval\usb_pwr.o"
 "stm3210e-eval\hw_config.o"
 "stm3210e-eval\main.o"
+"stm3210e-eval\mass_mal.o"
+"stm3210e-eval\memory.o"
+"stm3210e-eval\scsi_data.o"
+"stm3210e-eval\sd.o"
+"stm3210e-eval\spi.o"
+"stm3210e-eval\usb_bot.o"
+"stm3210e-eval\usb_scsi.o"
 --library_type=microlib --strict --scatter "STM3210E-EVAL\STM3210E-EVAL.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

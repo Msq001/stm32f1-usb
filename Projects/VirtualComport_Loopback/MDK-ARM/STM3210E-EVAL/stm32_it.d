@@ -34,10 +34,10 @@ stm3210e-eval\stm32_it.o: ../../../Libraries/STM32F10x_StdPeriph_Driver/inc/stm3
 stm3210e-eval\stm32_it.o: ../../../Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_wwdg.h
 stm3210e-eval\stm32_it.o: ../../../Libraries/STM32F10x_StdPeriph_Driver/inc/misc.h
 stm3210e-eval\stm32_it.o: ../../../Utilities/STM32_EVAL/Common/stm32_eval_legacy.h
-stm3210e-eval\stm32_it.o: ../../../Libraries/STM32_USB-FS-Device_Driver/inc/usb_type.h
-stm3210e-eval\stm32_it.o: ../inc/usb_conf.h
 stm3210e-eval\stm32_it.o: ../inc/stm32_it.h
 stm3210e-eval\stm32_it.o: ../../../Libraries/STM32_USB-FS-Device_Driver/inc/usb_lib.h
+stm3210e-eval\stm32_it.o: ../../../Libraries/STM32_USB-FS-Device_Driver/inc/usb_type.h
+stm3210e-eval\stm32_it.o: ../inc/usb_conf.h
 stm3210e-eval\stm32_it.o: ../../../Libraries/STM32_USB-FS-Device_Driver/inc/usb_regs.h
 stm3210e-eval\stm32_it.o: ../../../Libraries/STM32_USB-FS-Device_Driver/inc/usb_def.h
 stm3210e-eval\stm32_it.o: ../../../Libraries/STM32_USB-FS-Device_Driver/inc/usb_core.h

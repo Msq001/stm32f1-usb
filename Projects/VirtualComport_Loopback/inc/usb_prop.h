@@ -59,7 +59,7 @@ typedef struct
 #define Virtual_Com_Port_GetInterface              NOP_Process
 #define Virtual_Com_Port_SetInterface              NOP_Process
 #define Virtual_Com_Port_GetStatus                 NOP_Process
-#define Virtual_Com_Port_ClearFeature              NOP_Process
+//#define Virtual_Com_Port_ClearFeature              NOP_Process
 #define Virtual_Com_Port_SetEndPointFeature        NOP_Process
 #define Virtual_Com_Port_SetDeviceFeature          NOP_Process
 //#define Virtual_Com_Port_SetDeviceAddress          NOP_Process
@@ -74,10 +74,16 @@ typedef struct
 #define SET_CONTROL_LINE_STATE      0x22
 #define SEND_BREAK                  0x23
 
+/* MASS Storage Requests*/
+#define GET_MAX_LUN                0xFE
+#define MASS_STORAGE_RESET         0xFF
+#define LUN_DATA_LENGTH            1
+
 /* Exported functions ------------------------------------------------------- */
 void Virtual_Com_Port_init(void);
 void Virtual_Com_Port_Reset(void);
 void Virtual_Com_Port_SetConfiguration(void);
+void Virtual_Com_Port_ClearFeature(void);
 void Virtual_Com_Port_SetDeviceAddress (void);
 void Virtual_Com_Port_Status_In (void);
 void Virtual_Com_Port_Status_Out (void);
@@ -87,6 +93,7 @@ RESULT Virtual_Com_Port_Get_Interface_Setting(uint8_t Interface, uint8_t Alterna
 uint8_t *Virtual_Com_Port_GetDeviceDescriptor(uint16_t );
 uint8_t *Virtual_Com_Port_GetConfigDescriptor(uint16_t);
 uint8_t *Virtual_Com_Port_GetStringDescriptor(uint16_t);
+uint8_t *Get_Max_Lun(uint16_t Length);
 
 uint8_t *Virtual_Com_Port_GetLineCoding(uint16_t Length);
 uint8_t *Virtual_Com_Port_SetLineCoding(uint16_t Length);
